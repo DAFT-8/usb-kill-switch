@@ -1,13 +1,17 @@
 #!/bin/bash
 
-command -v slock > /dev/null 2>&1 || { echo >&2 "I require slock but it's not installed. Install it. Aborting."; exit 1; }
+command -v slock > /dev/null 2>&1 || {
+    echo >&2 "I require slock but it's not installed. Please install it. Aborting."
+    exit 1
+}
+
 get_connected_usb_devices() {
     for dev in /sys/block/*; do
         props=$(udevadm info --query=property --name="${dev##*/}" 2>/dev/null)
         if echo "$props" | grep -q "ID_BUS=usb"; then
             echo "$props" | grep -E "ID_VENDOR=|ID_MODEL=|ID_SERIAL=" | tr '\n' ' '
             echo
-	fi
+        fi
     done
 }
 
@@ -16,15 +20,14 @@ initial_devices=$(get_connected_usb_devices)
 echo "Monitoring USB devices..."
 echo "Initial connected USB devices:"
 echo "$initial_devices"
-echo
 
 while true; do
     current_devices=$(get_connected_usb_devices)
 
     if [[ "$current_devices" != "$initial_devices" ]]; then
-        # you can add custom commands here.
- 	slock
-	break
+        # Custom commands to execute
+        slock
+        break
     fi
 
     sleep 2
